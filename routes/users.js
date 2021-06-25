@@ -102,26 +102,56 @@ router.post('/login', async (req,res) => {
 })
 
 
-router.post('/register', async (req,res)=>{
-    let user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        passwordHash: bcrypt.hashSync(req.body.password, 10),
-        phone: req.body.phone,
-        isAdmin: req.body.isAdmin,
-        street: req.body.street,
-        apartment: req.body.apartment,
-        zip: req.body.zip,
-        city: req.body.city,
-        country: req.body.country,
-    })
-    user = await user.save();
+router.route("/register").post((req, res) => {
+    
+    User.findOne({ email: req.body.email })
+      .then(savedUser => {
+        if (savedUser) {
+          return res.status(400).json({ error: "Email already exist" });
+        }
+        let user = new User({
+            name: req.body.name,
+            email: req.body.email,
+            passwordHash: bcrypt.hashSync(req.body.password, 10),
+            phone: req.body.phone,
+            isAdmin: req.body.isAdmin,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            zip: req.body.zip,
+            city: req.body.city,
+            country: req.body.country,
+        })
+        user =  user.save();
+        if(!user)
+        return res.status(400).send('the user cannot be created!')
+    
+        res.send(user);s
+      })
+      .catch(err => {
+        res.status(500).json({ error: err.toString() });
+      });
+  });
 
-    if(!user)
-    return res.status(400).send('the user cannot be created!')
+// router.post('/register', async (req,res)=>{
+//     let user = new User({
+//         name: req.body.name,
+//         email: req.body.email,
+//         passwordHash: bcrypt.hashSync(req.body.password, 10),
+//         phone: req.body.phone,
+//         isAdmin: req.body.isAdmin,
+//         street: req.body.street,
+//         apartment: req.body.apartment,
+//         zip: req.body.zip,
+//         city: req.body.city,
+//         country: req.body.country,
+//     })
+//     user = await user.save();
 
-    res.send(user);
-})
+//     if(!user)
+//     return res.status(400).send('the user cannot be created!')
+
+//     res.send(user);
+// })
 
 
 router.delete('/:id', (req, res)=>{
