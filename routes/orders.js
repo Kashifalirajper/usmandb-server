@@ -13,7 +13,23 @@ router.get(`/`, async (req, res) => {
   }
   res.send(orderList);
 });
+router.get(`/userOrder/:id`, async (req, res) => {
+  const orderID = req.params.id;
+  const order = await Order.find({ user: orderID }).populate('user')
+    .populate("user", "name")
+    .populate({
+      path: "orderItems",
+      populate: {
+        path: "product",
+        populate: "category",
+      },
+    });
 
+  if (!order) {
+    res.status(500).json({ success: false });
+  }
+  res.send(order);
+});
 router.get(`/:id`, async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate("user", "name")
